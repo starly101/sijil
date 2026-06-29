@@ -8,79 +8,80 @@
 
 ```typescript
 // Main admin dashboard with overview metrics and quick actions
-- Fetch analytics summary
-- Display key metrics cards (users, topics, documents, assessments)
-- Show recent activity feed
-- Quick action buttons
+- Fetch analytics summary from backend
+- Display key metrics cards (total topics, documents, assessments, imports)
+- Show recent import activity
+- Quick action buttons (New Ingest, New Import)
 - System health indicators
 ```
 
 **Layout:** `apps/web/app/admin/layout.tsx`
 ```typescript
 // AdminLayout component
-- Sidebar navigation
+- Sidebar navigation (ingest, import, topics, documents, assessments, analytics)
 - Header with admin user info
 - Main content area
 - Breadcrumb navigation
 - Admin-only route protection (middleware)
 ```
 
-### 2. Content Moderation Queue
+### 2. JSON Ingestion
 
-**List Page:** `apps/web/app/admin/moderation/page.tsx`
+**Page:** `apps/web/app/admin/ingest/page.tsx`
 ```typescript
-// ModerationQueue page
-- Pending documents awaiting review
-- Filters: type, submitter, date submitted
-- Search by document title
-- Bulk approve/reject actions
-- View document preview modal
-- Sortable columns (date, type, status)
+// JsonIngest page
+- File upload area for JSON files
+- Drag-and-drop support
+- Upload progress indicator
+- Validation results display
+- Success/error messages
+- Recent ingestion history
 ```
 
-**Detail Page:** `apps/web/app/admin/moderation/[id]/page.tsx`
+### 3. Batch Import
+
+**List Page:** `apps/web/app/admin/import/page.tsx`
 ```typescript
-// ModerationDetail page
-- Full document preview
-- Document metadata
-- Approve button (publishes document)
-- Reject button (with reason input)
-- Return to submitter option
-- History of moderation actions
+// BatchImportList page
+- Table of recent/scheduled imports
+- Filters: status (pending, in-progress, completed, failed)
+- Search by batch ID or source URL
+- Create new import button
+- Retry failed imports
+- Cancel running imports
 ```
 
-### 3. Topic Management
+**Detail Page:** `apps/web/app/admin/import/[id]/page.tsx`
+```typescript
+// BatchImportDetail page
+- Import status progress bar
+- Files processed count
+- Success/failure counts
+- Error details for failed files
+- Retry button for failed items
+- Download report button
+- Real-time updates (polling)
+```
+
+### 4. Topic Management (Read-Only View)
 
 **List Page:** `apps/web/app/admin/topics/page.tsx`
 ```typescript
-// TopicManager list
+// TopicManager list (read-only view)
 - All topics table
-- Filters: category, status, author
+- Filters: category, status
 - Search functionality
-- Create new topic button
-- Bulk actions (publish, archive, delete)
+- View topic details
+- No create/edit/delete (handled via import)
 ```
 
-**Create/Edit Page:** `apps/web/app/admin/topics/new/page.tsx`
-`apps/web/app/admin/topics/[id]/edit/page.tsx`
-```typescript
-// TopicEditor form
-- Title, slug, description fields
-- Category selection
-- Content editor (rich text)
-- SEO metadata
-- Publish status
-- Featured image upload
-- Preview mode
-```
-
-### 4. Document Moderation
+### 5. Document Moderation
 
 **List Page:** `apps/web/app/admin/documents/page.tsx`
 ```typescript
 // DocumentModerator queue
-- Pending documents
-- Filters: status, type, submitter
+- Pending documents awaiting review
+- Filters: status, type
 - Approval/rejection actions
 - Bulk approve/reject
 - View document preview
@@ -97,92 +98,29 @@
 - Associated topic link
 ```
 
-### 5. Assessment Management
+### 6. Assessment Management (Read-Only View)
 
 **List Page:** `apps/web/app/admin/assessments/page.tsx`
 ```typescript
-// Assessment list
+// Assessment list (read-only)
 - All assessments table
 - Filters: type, topic, status
 - Search by title
-- Create assessment button
-- Duplicate assessment action
+- View assessment details
+- No create/edit (handled via import)
 ```
 
-**Create/Edit Page:** `apps/web/app/admin/assessments/new/page.tsx`
-`apps/web/app/admin/assessments/[id]/edit/page.tsx`
-```typescript
-// AssessmentEditor
-- Basic info (title, description, type)
-- Topic association
-- Question builder
-  - Add/remove questions
-  - Question types (MCQ, true/false, short answer)
-  - Answer options
-  - Correct answer marking
-  - Explanation field
-  - Drag-and-drop reordering
-- Settings (time limit, passing score, shuffle)
-- Preview mode
-- Save draft/Publish
-```
-
-### 6. Analytics Overview
+### 7. Analytics Overview
 
 **Page:** `apps/web/app/admin/analytics/page.tsx`
 ```typescript
 // AnalyticsDashboard
-- User growth chart (line graph)
-- Topic engagement (bar chart)
-- Assessment performance (pie chart)
-- Document submissions trend
-- Top performing topics
-- User activity heatmap
+- Basic metrics display (counts from backend)
+- Import success rates
+- Document approval stats
+- Topic coverage overview
 - Date range picker
-- Export report button
-```
-
-### 7. System Settings
-
-**Page:** `apps/web/app/admin/settings/page.tsx`
-```typescript
-// SettingsForm
-- General settings
-  - Site name, logo, favicon
-  - Default language
-  - Timezone
-- Authentication settings
-  - Session timeout
-  - Password policies
-  - 2FA enforcement
-- Content settings
-  - Default topic visibility
-  - Document approval workflow
-  - Assessment defaults
-- Email settings
-  - SMTP configuration
-  - Email templates
-  - Notification preferences
-- Storage settings
-  - File upload limits
-  - Supported formats
-  - CDN configuration
-- Feature flags
-  - Enable/disable features
-  - A/B test configuration
-```
-
-### 8. Audit Logs
-
-**Page:** `apps/web/app/admin/logs/page.tsx`
-```typescript
-// AuditLogTable
-- Log entries table
-- Filters: user, action, date range, resource type
-- Search functionality
-- Log detail modal
-- Export logs button
-- Real-time updates (optional WebSocket)
+- Simple charts (if backend supports)
 ```
 
 ---
@@ -221,16 +159,15 @@ interface AdminLayoutProps {
 **File:** `apps/web/components/admin/AdminSidebar.tsx`
 
 ```typescript
-// Navigation items:
+// Navigation items (based on actual backend capabilities):
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: DashboardIcon },
-  { label: 'Users', href: '/admin/users', icon: UsersIcon },
+  { label: 'Ingest JSON', href: '/admin/ingest', icon: IngestIcon },
+  { label: 'Batch Import', href: '/admin/import', icon: ImportIcon },
   { label: 'Topics', href: '/admin/topics', icon: TopicsIcon },
   { label: 'Documents', href: '/admin/documents', icon: DocumentsIcon },
   { label: 'Assessments', href: '/admin/assessments', icon: AssessmentsIcon },
   { label: 'Analytics', href: '/admin/analytics', icon: AnalyticsIcon },
-  { label: 'Settings', href: '/admin/settings', icon: SettingsIcon },
-  { label: 'Audit Logs', href: '/admin/logs', icon: LogsIcon },
 ];
 
 // Features:
