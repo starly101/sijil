@@ -27,22 +27,21 @@ Every requirement below must be met and verified before this phase is considered
 - [ ] Previous button returns to previous question
 - [ ] Progress bar updates accurately (±0%)
 - [ ] Question count displays correctly (e.g., "3 of 10")
-- [ ] Submit button appears on last question
+- [ ] Complete button appears on last question (client-side only)
 
 ### 1.4 Progress Persistence
 - [ ] Answers save to localStorage automatically
 - [ ] Page refresh preserves all answered questions
 - [ ] Browser close/reopen preserves progress
-- [ ] Progress clears after successful submission
+- [ ] Progress clears after quiz completion
 - [ ] Multiple quizzes maintain separate progress
 
-### 1.5 Quiz Submission
-- [ ] Confirmation dialog shows before submit
+### 1.5 Quiz Completion (Client-Side Only)
+- [ ] Confirmation dialog shows before completing
 - [ ] Dialog displays question count summary
-- [ ] Submit API call includes all answers
-- [ ] Loading indicator shows during submission
+- [ ] Results calculated client-side from stored answers
+- [ ] Loading indicator shows during calculation
 - [ ] Success redirects to results page
-- [ ] Failure shows error with retry option
 
 ### 1.6 Results Display
 - [ ] Score percentage calculates correctly
@@ -55,7 +54,7 @@ Every requirement below must be met and verified before this phase is considered
 
 ---
 
-## 2. Practice Mode (Must Have)
+## 2. Practice-Style Learning (Must Have)
 
 ### 2.1 Immediate Feedback
 - [ ] Feedback appears within 200ms of answer selection
@@ -77,7 +76,7 @@ Every requirement below must be met and verified before this phase is considered
 
 ---
 
-## 3. Graded Mode (Must Have)
+## 3. Graded-Style Mode (Client-Side Only)
 
 ### 3.1 Answer Visibility
 - [ ] Correct answers hidden until submission
@@ -87,13 +86,13 @@ Every requirement below must be met and verified before this phase is considered
 ### 3.2 Completion Requirements
 - [ ] All questions must be answered OR blank allowed (configurable)
 - [ ] Warning if unanswered questions exist
-- [ ] Submit blocked until requirements met (if configured)
+- [ ] Complete blocked until requirements met (if configured)
 
-### 3.3 Scoring
+### 3.3 Client-Side Scoring
 - [ ] Points per question sum correctly
 - [ ] Percentage = (earnedPoints / totalPoints) * 100
 - [ ] Rounding to 1 decimal place
-- [ ] Passing score comparison accurate
+- [ ] Passing score comparison accurate (client-side only, no backend validation)
 
 ---
 

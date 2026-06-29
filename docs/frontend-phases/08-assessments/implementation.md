@@ -413,22 +413,15 @@ export const assessmentsApi = {
   },
 
   getById: async (id: string) => {
-    const response = await apiClient.get(`/api/v1/assessments/${id}`);
-    return response.data;
+    // Note: No backend endpoint exists for getting assessment by ID
+    // This is a placeholder - assessments are fetched via topic
+    throw new Error('Use getByTopicId instead');
   },
 
-  submit: async (id: string, answers: Record<string, string>, timeSpent: number) => {
-    const response = await apiClient.post(`/api/v1/assessments/${id}/submit`, {
-      answers,
-      timeSpent,
-    });
-    return response.data;
-  },
+  // Note: No submit endpoint exists - assessments are client-side interactive tools
+  // Answers are stored in localStorage, not submitted to backend
 
-  getResults: async (id: string) => {
-    const response = await apiClient.get(`/api/v1/assessments/${id}/results`);
-    return response.data;
-  },
+  // Note: No results endpoint exists - results are calculated client-side
 };
 ```
 
@@ -446,19 +439,19 @@ export const assessmentsApi = {
 - [ ] Results display accurate scores
 - [ ] Feedback shows correct/incorrect status
 
-### Practice Mode
+### Practice-Style Learning
 
 - [ ] Immediate feedback after each answer
 - [ ] Explanation displays for each question
 - [ ] Unlimited retries allowed
 - [ ] Skip functionality works
 
-### Graded Mode
+### Graded-Style Mode (Client-Side)
 
-- [ ] Answers hidden until submission
-- [ ] All questions must be answered before submit (or allow blank)
-- [ ] Score calculated correctly
-- [ ] Pass/fail determined by passing score threshold
+- [ ] Answers hidden until completion
+- [ ] All questions must be answered before complete (or allow blank)
+- [ ] Score calculated client-side correctly
+- [ ] Pass/fail determined by passing score threshold (client-side only)
 
 ### UI/UX
 
@@ -493,8 +486,8 @@ export const assessmentsApi = {
 ❌ **Not saving progress** - User loses answers on refresh
 ✅ **Solution:** Auto-save to localStorage on every answer change
 
-❌ **Showing correct answers too early** - Ruins graded mode
-✅ **Solution:** Only show feedback after submission in graded mode
+❌ **Showing correct answers too early** - Ruins graded-style mode
+✅ **Solution:** Only show feedback after completion in graded-style mode
 
 ❌ **Poor keyboard navigation** - Inaccessible to keyboard users
 ✅ **Solution:** Test with Tab/Enter/Space keys throughout

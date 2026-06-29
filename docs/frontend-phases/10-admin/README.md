@@ -2,58 +2,47 @@
 
 ## Overview
 
-This phase implements the admin dashboard for Sijil, enabling administrators to manage users, topics, documents, assessments, and system settings. The admin panel provides a comprehensive interface for content moderation, user management, analytics overview, and platform configuration.
+This phase implements the admin dashboard for Sijil, enabling administrators to manage content ingestion, batch imports, analytics, and system settings. The admin panel provides a comprehensive interface for content operations, import management, analytics overview, and platform configuration.
+
+**Note:** User management functionality is NOT included - there are no user CRUD APIs in the backend. Focus on content ingestion, import, and analytics features only.
 
 ## Goals
 
 - Build a secure admin dashboard accessible only to authorized users
-- Implement user management (view, edit, suspend, delete)
-- Create topic management interface (CRUD operations)
-- Build document moderation tools
-- Implement assessment management
+- Create JSON ingestion interface for single document uploads
+- Build batch import interface for GitHub repository imports
 - Provide system analytics overview
-- Enable role-based access control (RBAC)
+- Enable import status tracking and retry/cancel operations
 - Create audit logging interface
 
 ## Deliverables
 
 1. **Admin Pages**
    - Admin Dashboard (`/admin`)
-   - User Management (`/admin/users`, `/admin/users/[id]`)
-   - Topic Management (`/admin/topics`, `/admin/topics/[id]/edit`)
-   - Document Moderation (`/admin/documents`, `/admin/documents/[id]`)
-   - Assessment Management (`/admin/assessments`, `/admin/assessments/[id]/edit`)
+   - JSON Ingestion (`/admin/ingest`)
+   - Batch Import (`/admin/import`)
+   - Import Status (`/admin/import/[batchId]`)
    - Analytics Overview (`/admin/analytics`)
-   - System Settings (`/admin/settings`)
-   - Audit Logs (`/admin/logs`)
+   - Version History (`/admin/versions/[type]/[id]`)
 
 2. **Components**
    - `AdminLayout` - Admin-specific layout with sidebar navigation
    - `AdminSidebar` - Navigation menu for admin sections
-   - `UserTable` - User list with filters and actions
-   - `UserDetailCard` - Individual user information display
-   - `TopicManager` - Topic CRUD interface
-   - `DocumentModerator` - Document approval/rejection interface
-   - `AssessmentEditor` - Assessment creation/editing form
+   - `IngestionForm` - JSON ingestion form with validation
+   - `ImportPreview` - Batch import preview table
+   - `ImportProgress` - Import progress indicator
    - `AnalyticsDashboard` - Key metrics visualization
-   - `RoleSelector` - Role assignment component
-   - `StatusBadge` - Content status indicators
-   - `AuditLogTable` - System activity log display
-   - `SettingsForm` - System configuration form
-   - `BulkActionToolbar` - Multi-select action toolbar
+   - `StatusBadge` - Job status indicators
+   - `VersionHistoryTable` - Version history display
    - `FilterPanel` - Advanced filtering controls
    - `PaginationControls` - Table pagination
 
 3. **Features**
-   - Role-based access control (Admin, Moderator, Editor)
-   - User search and filtering
-   - Bulk user actions (suspend, delete, role change)
-   - Topic CRUD with rich text editor
-   - Document approval workflow
-   - Assessment builder with question management
+   - JSON ingestion for single document uploads
+   - Batch import from GitHub repositories
+   - Import status tracking with retry/cancel
    - Real-time analytics charts
-   - Audit trail viewing
-   - System configuration management
+   - Version history viewing
    - Export admin data (CSV, PDF)
 
 ## Dependencies
@@ -67,27 +56,18 @@ This phase implements the admin dashboard for Sijil, enabling administrators to 
 - Phase 09: Exports (data export utilities)
 
 **Required APIs:**
-- `GET /api/v1/admin/users` - List users with pagination/filters
-- `GET /api/v1/admin/users/:id` - Get user details
-- `PATCH /api/v1/admin/users/:id` - Update user
-- `DELETE /api/v1/admin/users/:id` - Delete user
-- `POST /api/v1/admin/users/:id/suspend` - Suspend user
-- `GET /api/v1/admin/topics` - List all topics
-- `POST /api/v1/admin/topics` - Create topic
-- `PATCH /api/v1/admin/topics/:id` - Update topic
-- `DELETE /api/v1/admin/topics/:id` - Delete topic
-- `GET /api/v1/admin/documents` - List documents for moderation
-- `PATCH /api/v1/admin/documents/:id/approve` - Approve document
-- `PATCH /api/v1/admin/documents/:id/reject` - Reject document
-- `GET /api/v1/admin/assessments` - List assessments
-- `POST /api/v1/admin/assessments` - Create assessment
-- `PATCH /api/v1/admin/assessments/:id` - Update assessment
-- `DELETE /api/v1/admin/assessments/:id` - Delete assessment
+- `POST /api/ingest/json` - Submit JSON for ingestion
+- `GET /api/ingest/:trackingId` - Get ingestion status
+- `POST /api/ingest/:id/cancel` - Cancel pending job
+- `POST /api/ingest/:id/retry` - Retry failed job
+- `POST /api/admin/import/preview` - Preview GitHub import
+- `POST /api/admin/import/start` - Start batch import
+- `GET /api/admin/import/:batchId` - Get import status
+- `POST /api/admin/import/:batchId/retry` - Retry failed files
+- `POST /api/admin/import/:batchId/cancel` - Cancel import
+- `GET /api/admin/import/:batchId/report` - Download report
 - `GET /api/v1/admin/analytics/overview` - Get analytics summary
-- `GET /api/v1/admin/settings` - Get system settings
-- `PATCH /api/v1/admin/settings` - Update settings
-- `GET /api/v1/admin/audit-logs` - Get audit logs
-- `POST /api/v1/admin/export` - Export admin data
+- `GET /api/export/download` - Export admin data
 
 ## Exit Criteria
 

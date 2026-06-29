@@ -20,7 +20,6 @@ This phase implements the export functionality allowing users to download docume
    - `ExportModal` - Format selection and options
    - `ExportStatusIndicator` - Progress/status display
    - `DownloadButton` - Download completed exports
-   - `ExportHistory` - List of past exports (optional)
 
 2. **Pages**
    - Export Status Page (`/exports/[jobId]`)
