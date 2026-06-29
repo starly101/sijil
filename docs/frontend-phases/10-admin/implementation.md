@@ -25,38 +25,28 @@
 - Admin-only route protection (middleware)
 ```
 
-### 2. User Management
+### 2. Content Moderation Queue
 
-**List Page:** `apps/web/app/admin/users/page.tsx`
+**List Page:** `apps/web/app/admin/moderation/page.tsx`
 ```typescript
-// UserTable page
-- Paginated user list
-- Search by name/email
-- Filters: role, status, date range
-- Bulk actions toolbar
-- Sortable columns
-- Export to CSV button
+// ModerationQueue page
+- Pending documents awaiting review
+- Filters: type, submitter, date submitted
+- Search by document title
+- Bulk approve/reject actions
+- View document preview modal
+- Sortable columns (date, type, status)
 ```
 
-**Detail Page:** `apps/web/app/admin/users/[id]/page.tsx`
+**Detail Page:** `apps/web/app/admin/moderation/[id]/page.tsx`
 ```typescript
-// UserDetail page
-- User profile information
-- Activity history
-- Role assignment
-- Account status controls
-- Delete/suspend actions
-- Associated content (topics, documents)
-```
-
-**Edit Page:** `apps/web/app/admin/users/[id]/edit/page.tsx`
-```typescript
-// UserEdit form
-- Profile fields
-- Role selector
-- Status toggle
-- Password reset option
-- Validation rules
+// ModerationDetail page
+- Full document preview
+- Document metadata
+- Approve button (publishes document)
+- Reject button (with reason input)
+- Return to submitter option
+- History of moderation actions
 ```
 
 ### 3. Topic Management
@@ -251,53 +241,57 @@ const navItems = [
 - Keyboard navigation
 ```
 
-### UserTable Component
+### ModerationQueue Component
 
-**File:** `apps/web/components/admin/UserTable.tsx`
+**File:** `apps/web/components/admin/ModerationQueue.tsx`
 
 ```typescript
-interface UserTableProps {
-  users: User[];
+interface ModerationQueueProps {
+  documents: PendingDocument[];
   totalCount: number;
   onPageChange: (page: number) => void;
   onSortChange: (field: string, direction: 'asc' | 'desc') => void;
-  onBulkAction: (action: string, userIds: string[]) => void;
+  onBulkAction: (action: 'approve' | 'reject', docIds: string[]) => void;
 }
 
 // Columns:
 - Checkbox (for bulk selection)
-- Name (sortable)
-- Email (sortable)
-- Role (sortable, filterable)
-- Status (active/suspended, filterable)
-- Created At (sortable)
-- Last Active (sortable)
-- Actions (view, edit, suspend, delete)
+- Document Title (sortable)
+- Type (sortable, filterable)
+- Submitter (sortable)
+- Submitted At (sortable)
+- Status (pending/reviewed, filterable)
+- Actions (view, approve, reject)
 
 // Features:
 - Pagination controls
 - Column sorting
 - Row selection
-- Bulk action toolbar
+- Bulk approve/reject toolbar
 - Empty state
 - Loading skeleton
 - Error state
 ```
 
-### UserDetailCard Component
+### ModerationDetailCard Component
 
-**File:** `apps/web/components/admin/UserDetailCard.tsx`
+**File:** `apps/web/components/admin/ModerationDetailCard.tsx`
 
 ```typescript
-interface UserDetailCardProps {
-  user: User;
-  onRoleChange: (roleId: string) => void;
-  onStatusChange: (status: 'active' | 'suspended') => void;
-  onDelete: () => void;
+interface ModerationDetailCardProps {
+  document: PendingDocument;
+  onApprove: () => void;
+  onReject: (reason: string) => void;
+  onReturnToSubmitter: () => void;
 }
 
 // Sections:
-- Profile header (avatar, name, email)
+- Document header (title, type, submitter, date)
+- Full document preview
+- Metadata panel
+- Action buttons (approve, reject with reason, return)
+- Moderation history timeline
+```
 - Account info (role, status, joined date)
 - Activity stats (logins, content created, assessments taken)
 - Recent actions log
@@ -444,24 +438,24 @@ interface AnalyticsDashboardProps {
 - Metric cards at top
 ```
 
-### RoleSelector Component
+### ModerationActions Component
 
-**File:** `apps/web/components/admin/RoleSelector.tsx`
+**File:** `apps/web/components/admin/ModerationActions.tsx`
 
 ```typescript
-interface RoleSelectorProps {
-  selectedRoleId: string;
-  availableRoles: Role[];
-  onChange: (roleId: string) => void;
-  disabled?: boolean;
+interface ModerationActionsProps {
+  documentId: string;
+  onApprove: () => void;
+  onReject: (reason: string) => void;
+  isLoading?: boolean;
 }
 
 // Features:
-- Dropdown select
-- Role descriptions on hover
-- Current role highlighted
-- Permission summary
-- Confirmation on downgrade
+- Approve button (green, primary)
+- Reject button with reason modal (red, secondary)
+- Loading state during API call
+- Confirmation dialog for bulk actions
+- Success/error toast notifications
 ```
 
 ### StatusBadge Component
@@ -626,13 +620,12 @@ Admin Routes:
 **File:** `apps/web/lib/api/admin.ts`
 
 ```typescript
-// Users
-export async function getUsers(params: GetUsersParams): Promise<PaginatedResponse<User>>
-export async function getUser(id: string): Promise<User>
-export async function updateUser(id: string, data: UpdateUserInput): Promise<User>
-export async function deleteUser(id: string): Promise<void>
-export async function suspendUser(id: string): Promise<User>
-export async function unsuspendUser(id: string): Promise<User>
+// Moderation Queue
+export async function getPendingDocuments(params: GetDocumentsParams): Promise<PaginatedResponse<PendingDocument>>
+export async function approveDocument(id: string): Promise<void>
+export async function rejectDocument(id: string, reason: string): Promise<void>
+export async function bulkApproveDocuments(ids: string[]): Promise<void>
+export async function bulkRejectDocuments(ids: string[], reason: string): Promise<void>
 
 // Topics
 export async function getTopics(params: GetTopicsParams): Promise<PaginatedResponse<Topic>>
@@ -1152,15 +1145,15 @@ apps/web/
 │       ├── AdminLayout.tsx
 │       ├── AdminSidebar.tsx
 │       ├── AdminHeader.tsx
-│       ├── UserTable.tsx
-│       ├── UserDetailCard.tsx
+│       ├── ModerationQueue.tsx
+│       ├── ModerationDetailCard.tsx
 │       ├── TopicManager.tsx
 │       ├── TopicEditor.tsx
 │       ├── DocumentModerator.tsx
 │       ├── AssessmentEditor.tsx
 │       ├── QuestionBuilder.tsx
 │       ├── AnalyticsDashboard.tsx
-│       ├── RoleSelector.tsx
+│       ├── ModerationActions.tsx
 │       ├── StatusBadge.tsx
 │       ├── AuditLogTable.tsx
 │       ├── BulkActionToolbar.tsx
@@ -1203,7 +1196,7 @@ export const metadata: Metadata = {
 
 ```typescript
 // Use skeletons for all tables and cards
-// Example: UserTableSkeleton.tsx
+// Example: ModerationQueueSkeleton.tsx
 
 // Loading states:
 - Page load: Full page skeleton
@@ -1274,7 +1267,7 @@ export const metadata: Metadata = {
 ### Specific Implementations
 
 ```typescript
-// Example: Accessible UserTable
+// Example: Accessible ModerationQueue
 <table aria-label="Users table" role="grid">
   <caption className="sr-only">List of all users in the system</caption>
   <thead>
@@ -1364,7 +1357,7 @@ export const metadata: Metadata = {
 ### Component-Specific Responses
 
 ```typescript
-// UserTable:
+// ModerationQueue:
 - Desktop: Full table with 8 columns
 - Tablet: Hide less important columns (last active, created at)
 - Mobile: Convert to card list
@@ -1542,13 +1535,13 @@ Response: AnalyticsMetrics
 ### Components
 - [ ] AdminLayout renders correctly
 - [ ] AdminSidebar navigation works
-- [ ] UserTable displays users with pagination
-- [ ] UserDetailCard shows user information
+- [ ] ModerationQueue displays users with pagination
+- [ ] ModerationDetailCard shows user information
 - [ ] TopicManager handles topic CRUD
 - [ ] DocumentModerator processes approvals
 - [ ] AssessmentEditor builds assessments
 - [ ] AnalyticsDashboard renders charts
-- [ ] RoleSelector assigns roles
+- [ ] ModerationActions assigns roles
 - [ ] StatusBadge displays statuses
 - [ ] AuditLogTable shows logs
 - [ ] BulkActionToolbar executes bulk actions
